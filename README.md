@@ -1,22 +1,17 @@
-MSAMDD Version 1.0 - Exact Multiple Sequence Alignment by Synchronized Decision Diagrams
+MSAMDD-Ling Version 0.0 (in development) - Exact Multiple Sequence Alignment by Synchronized Decision Diagrams _for Linguistics_
 
-Copyright (C) 2019 Amin Hosseininasab
+Copyright (C) 2026 Jayden Macklin-Cordes
+
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied 
 warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 DESCRIPTION
-    MSAMDD is an multiple sequence alignment algorithm designed to generate optimal sequence alignments.
-    	
-REFERENCE
-    Please cite the below paper when using MSAMDD. Technical and algorithm specifics may also be found in this paper.
-    Hosseininasab, A. and van Hoeve, W.J., 2019. 
-    Exact Multiple Sequence Alignment by Synchronized Decision Diagrams. 
-    INFORMS Journal on Computing (to appear).
+    MSAMDD is an multiple sequence alignment algorithm designed to generate optimal sequence alignments. In this version, 
+	we extend the original MSAMDD package to work with sequences of linguistic data.
 
-CONTACT
-    amin.hosseininasab@warrington.ufl.edu
+**----- To be edited below here -----**
 
 INSTALLATION
     Designed for Linux systems. Installation from Makefile. Simply execute make from the terminal at the MSAMDD directory. The output is two executables: msa_aff and msa_cnv. 
@@ -70,4 +65,15 @@ DATABASE
     The MSAMDD package includes sequences for the BAliBASE versions 1 (./Data/bali1/) and BAliBASE version 4 (./Data/bali4). These databases may be downloaded from http://www.lbgi.fr/balibase/
     The MSAMDD package includes the BAliBASE databases for convenience, but claims no right to their ownership.
 
+**This is a fork of the MSAMDD Repository (https://github.com/aminhn/MSAMDD/):**
 
+Copyright (C) 2019 Amin Hosseininasab; GNU GPL v.2
+    	
+REFERENCE
+    Please cite the below paper when using MSAMDD. Technical and algorithm specifics may also be found in this paper.
+    Hosseininasab, A. and van Hoeve, W.J., 2019. 
+    Exact Multiple Sequence Alignment by Synchronized Decision Diagrams. 
+    INFORMS Journal on Computing (to appear).
+
+CONTACT
+    amin.hosseininasab@warrington.ufl.edu

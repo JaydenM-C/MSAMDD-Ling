@@ -282,19 +282,30 @@ void get_viol(list<IloRange>& viol_cons) {
 
 }*/
 
-double run_MUSCLE(string& inst, bool refine) {
+double run_warmstart(string& inst, bool refine) {
 
-	string str;
-	if (refine)
-		str = "chmod +x ./muscle && ./muscle -in " + inst + ".fa -out " + inst + "_s.txt -matrix " + subs_file + " -gapopen " + to_string(-opn_pen-ext_pen) + " -gapopen " + to_string(-opn_pen) + " -gapextend " + to_string(-ext_pen) + " -center 0.0 -refine -quiet";
-	else
-		str = "chmod +x ./muscle && ./muscle -in " + inst + ".fa -out " + inst + "_s.txt -matrix " + subs_file + " -gapopen " + to_string(-opn_pen-ext_pen) + " -gapopen " + to_string(-opn_pen) + " -gapextend " + to_string(-ext_pen) + " -center 0.0 -quiet";
+	// SeqAn-based warm start, a drop-in replacement for the former MUSCLE call.
+	//
+	// refine == true is the intra-solve re-invocation on an interim feasible
+	// solution (heuristic() in heur.cpp). MUSCLE's -refine iteratively refined
+	// that alignment in place; SeqAn's progressive aligner has no such in-place
+	// analogue, and re-aligning from scratch would discard the feasible solution
+	// and merely recompute the initial warm start. So here we skip the aligner
+	// and score the feasible solution as written, letting it update the incumbent
+	// if good and leaving genuine refinement to MSAMDD's own optimization. Only
+	// the initial warm start (refine == false) runs the aligner.
+	if (refine) {
+		string in_f = inst + ".fa";
+		return Load_sol(in_f);
+	}
+
+	string str = "chmod +x ./seqan_warmstart && ./seqan_warmstart -in " + inst + ".fa -out " + inst + "_s.txt -matrix " + subs_file + " -gapopen " + to_string(-opn_pen-ext_pen) + " -gapextend " + to_string(-ext_pen) + " -center 0.0 -quiet";
 
 	const char *command = str.c_str();
 	bool exc = system(command);
 
 	if (exc)
-		cout << "MUSCLE did not execute! Using previous solution if available\n";
+		cout << "Warm-start aligner did not execute! Using previous solution if available\n";
 
 	string out_f = inst + "_s.txt";
 

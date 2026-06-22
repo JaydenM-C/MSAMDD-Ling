@@ -1,7 +1,7 @@
 // seqan_warmstart.cpp
 //
 // Heuristic-MSA "warm start" aligner: a drop-in replacement for the external
-// MUSCLE invocation in run_MUSCLE(). It accepts MUSCLE-compatible command-line
+// MUSCLE invocation in run_warmstart(). It accepts MUSCLE-compatible command-line
 // flags, so the calling command string only needs its binary name changed. It
 // reads a FASTA, runs a SeqAn v2 progressive multiple sequence alignment under
 // a user-supplied substitution matrix and affine gap penalties, and writes an

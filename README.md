@@ -22,11 +22,13 @@ EXTERNAL SOFTWARE REQUIREMENTS FOR INSTALLATION
     CPLEX should be installed in the opt/ibm/ILOG directory at the root folder of the Linux system. 
     MSAMDD automatically detects and uses the latest version at this directory. In case CPLEX is installed in a different directory, 
     the user must change the default directory in the Makefile at line 5.
-    MSAMDD further requires the MUSCLE program for its heuristic alignments. Although MSAMDD can be executed without MUSCLE, its solution time will be significantly slowed.
-    MUSCLE may be downloaded from https://www.drive5.com/muscle/
-    All credit for the usage of the MUSCLE software goes to Robert C. Edgar, and should be properly cited as 
-    Edgar, R.C. (2004) MUSCLE: multiple sequence alignment with high accuracy and high throughput Nucleic Acids Res. 32(5):1792-1797 
-    The MSAMDD package includes MUSCLE for convenience, but claims no right to its ownership.
+    MSAMDD-Ling uses SeqAn v2 for its heuristic ("warm start") alignments, through the bundled seqan_warmstart program -- a drop-in replacement for the MUSCLE warm start used by upstream MSAMDD. Unlike MUSCLE, SeqAn accepts arbitrary single-character ASCII alphabets and custom substitution matrices, which is what lets MSAMDD-Ling align non-genomic (e.g. linguistic) data. As before, MSAMDD can be executed without a warm start, but its solution time will be significantly slowed.
+    SeqAn is vendored as a git submodule (pinned to release seqan-v2.5.3) under includes/seqan, so submodules must be initialised before building:
+        git submodule update --init --recursive
+    The Makefile then compiles seqan_warmstart from src/seqan_warmstart/ as part of the default "make" target, alongside msa_aff and msa_cnv. It requires a C++14 or later compiler (the target builds at C++17) and needs no separate download or installation.
+    SeqAn is open-source software; all credit for it goes to its authors, and it should be properly cited as
+    Döring, A., Weese, D., Rausch, T. and Reinert, K. (2008) SeqAn: An efficient, generic C++ library for sequence analysis. BMC Bioinformatics 9:11. https://doi.org/10.1186/1471-2105-9-11
+    The MSAMDD-Ling package includes SeqAn (as a submodule) for convenience, but claims no right to its ownership.
 
 DOWNLOAD
     MSAMDD can be downloaded from https://github.com/aminhn/MSAMDD

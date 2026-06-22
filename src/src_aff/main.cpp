@@ -81,14 +81,14 @@ int main(int argc, char* argv[]) {
 
 	clock_t kk = clock();
 
-	double incumb_muscle = run_MUSCLE(item_file, 0);
+	double incumb_warmstart = run_warmstart(item_file, 0);
 
-	if (incumb_muscle > incumb)
-		incumb = incumb_muscle;
+	if (incumb_warmstart > incumb)
+		incumb = incumb_warmstart;
 
 	elapsed_time[3] += give_time(clock() - kk);
 
-	cout << "heuristic solution value: " << incumb_muscle << endl;
+	cout << "heuristic solution value: " << incumb_warmstart << endl;
 
 	kk = clock();
 

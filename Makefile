@@ -1,19 +1,48 @@
-# --- SYSTEM ---
+# --- PLATFORM ---
+#
+# Detect the host OS to pick the CPLEX platform directory and toolchain flags,
+# so one Makefile builds the CPLEX solver on Linux (incl. Eureka2 / Rocky 8) and
+# on macOS. CPLEX ships an x86-64 build on macOS, so on Apple Silicon msa_* are
+# built as x86-64 binaries (run under Rosetta 2). The seqan_warmstart target is
+# CPLEX-independent and builds NATIVELY (arm64 on Apple Silicon) -- see below.
+#
+# Anything here can be overridden on the command line if your install differs:
+#   make SYSTEM=x86-64_linux BASISDIR=$$HOME/cplex     # CPLEX in HPC home/scratch
+#   make BASISILOG=/Applications/CPLEX_Studio2211      # pin a specific studio dir
+#   make CXX=g++-13                                    # a non-default compiler
 
-SYSTEM     = x86-64_linux
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Darwin)
+  SYSTEM    ?= x86-64_osx
+  BASISDIR  ?= /Applications
+  ARCHFLAG  := -arch x86_64    # link CPLEX's x86-64 macOS libs (Rosetta 2 on M1)
+  PIEFLAG   :=                 # -no-pie is GNU/Linux-only; omit on macOS
+  LDLIBS_OS :=                 # dlopen is in libSystem; no separate -ldl
+  SORTV     := sort            # BSD sort lacks -V; pin BASISILOG if multi-version
+else
+  SYSTEM    ?= x86-64_linux
+  BASISDIR  ?= /opt/ibm/ILOG
+  ARCHFLAG  := -m64
+  PIEFLAG   := -no-pie
+  LDLIBS_OS := -ldl
+  SORTV     := sort -V
+endif
+
 LIBFORMAT  = static_pic
-BASISDIR    = /opt/ibm/ILOG
 
 # --- DIRECTORIES ---
 
-CCC = g++ -std=gnu++11 -no-pie -Iincludes
-BASISILOG  = $(shell find $(BASISDIR) -maxdepth 1 -type d -name "CPLEX_Studio*" | sort -V | tail -1)
+CXX ?= g++
+CCC = $(CXX) -std=gnu++11 $(ARCHFLAG) $(PIEFLAG) -Iincludes
+BASISILOG ?= $(shell find $(BASISDIR) -maxdepth 1 -type d -name "CPLEX_Studio*" | $(SORTV) | tail -1)
 CONCERTDIR = $(BASISILOG)/concert
 CPLEXDIR   = $(BASISILOG)/cplex
 
 # --- FLAGS ---
 
-CCOPT = -m64 -fPIC -fno-strict-aliasing -fexceptions -DIL_STD -Wno-deprecated-declarations -Wno-ignored-attributes
+# Arch flag (-m64 / -arch x86_64) now lives in CCC so it applies at link too.
+CCOPT = -fPIC -fno-strict-aliasing -fexceptions -DIL_STD -Wno-deprecated-declarations -Wno-ignored-attributes
 CPLEXLIBDIR   = $(CPLEXDIR)/lib/$(SYSTEM)/$(LIBFORMAT)
 CONCERTLIBDIR = $(CONCERTDIR)/lib/$(SYSTEM)/$(LIBFORMAT)
 
@@ -29,7 +58,7 @@ PROF =
 
 CFLAGS += $(CCOPT) -I$(CPLEXINCDIR) -I$(CONCERTINCDIR) -I./include $(DEBUG_OPT) -c $(PROF)
 
-LDFLAGS = -L$(CPLEXLIBDIR) -lilocplex -lcplex -L$(CONCERTLIBDIR) -lconcert -lm -lpthread -ldl
+LDFLAGS = -L$(CPLEXLIBDIR) -lilocplex -lcplex -L$(CONCERTLIBDIR) -lconcert -lm -lpthread $(LDLIBS_OS)
 
 # ---- COMPILE  ----
 SRC_DIR_cnv   := src/src_cnv
@@ -63,11 +92,13 @@ EXECUTABLES = $(EXECUTABLE1) $(EXECUTABLE2)
 # SeqAn v2 warm-start aligner (drop-in replacement for the external MUSCLE
 # call). Built standalone at C++17 against the vendored SeqAn headers; it links
 # no CPLEX/Concert and is independent of the gnu++11 msa_* targets above, so the
-# two toolchains never mix in a single translation unit.
+# two toolchains never mix in a single translation unit. Note: NO $(ARCHFLAG)
+# here -- it builds for the host's native arch (arm64 on Apple Silicon), which is
+# fine even when msa_* are x86-64: a Rosetta parent can exec a native child.
 SEQAN_INC     = includes/seqan/include
 WARMSTART     = seqan_warmstart
 WARMSTART_SRC = src/seqan_warmstart/seqan_warmstart.cpp
-WARMSTART_CXX = g++ -std=gnu++17 -O3 -DNDEBUG -Wno-deprecated-declarations
+WARMSTART_CXX = $(CXX) -std=gnu++17 -O3 -DNDEBUG -Wno-deprecated-declarations
 
 all: $(EXECUTABLES) $(WARMSTART)
 

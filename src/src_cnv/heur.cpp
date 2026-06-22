@@ -13,7 +13,7 @@ void heuristic() {
 
 	write_sol(feas_sol, heur_f);
 
-	double val = run_MUSCLE(heur_f, 1);
+	double val = run_warmstart(heur_f, 1);
 
 	cout << "Heuristic solution value is: " << val << endl;
 

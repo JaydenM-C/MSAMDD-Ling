@@ -21,7 +21,7 @@ void build_ord_mat(IloCplex& SubP, vector<IloNumVarArray>& col_vars);
 void check_feas(vector<vector<int>*> mach_mat);
 void disp_sol(vector<vector<int>*> sol);
 bool get_MIPstart(IloNumVarArray& mipvars, IloNumArray& mipvals);
-double run_MUSCLE(string& inst, bool refine);
+double run_warmstart(string& inst, bool refine);
 void det_fun(int input);
 
 

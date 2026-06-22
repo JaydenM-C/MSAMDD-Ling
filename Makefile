@@ -60,13 +60,25 @@ EXECUTABLE2 = msa_aff
 
 EXECUTABLES = $(EXECUTABLE1) $(EXECUTABLE2)
 
-all: $(EXECUTABLES)
+# SeqAn v2 warm-start aligner (drop-in replacement for the external MUSCLE
+# call). Built standalone at C++17 against the vendored SeqAn headers; it links
+# no CPLEX/Concert and is independent of the gnu++11 msa_* targets above, so the
+# two toolchains never mix in a single translation unit.
+SEQAN_INC     = includes/seqan/include
+WARMSTART     = seqan_warmstart
+WARMSTART_SRC = src/seqan_warmstart/seqan_warmstart.cpp
+WARMSTART_CXX = g++ -std=gnu++17 -O3 -DNDEBUG -Wno-deprecated-declarations
+
+all: $(EXECUTABLES) $(WARMSTART)
 
 $(EXECUTABLE1): makedir $(SOURCES_cnv) $(OBJ_FILES_cnv) 
 	$(CCC) $(OBJ_FILES_cnv) $(LDFLAGS) $(PROF) -o $@
 
-$(EXECUTABLE2): makedir $(SOURCES_aff) $(OBJ_FILES_aff) 
+$(EXECUTABLE2): makedir $(SOURCES_aff) $(OBJ_FILES_aff)
 	$(CCC) $(OBJ_FILES_aff) $(LDFLAGS) $(PROF) -o $@
+
+$(WARMSTART): $(WARMSTART_SRC)
+	$(WARMSTART_CXX) -I $(SEQAN_INC) $< -o $@
 
 $(OBJ_DIR_cnv)/%.o: %.cpp
 	$(CCC) $(CFLAGS) $< -o $@
@@ -86,5 +98,6 @@ clean:
 	@rm -rf $(OBJ_DIR_aff)
 	@rm -rf $(EXECUTABLE1)
 	@rm -rf $(EXECUTABLE2)
+	@rm -rf $(WARMSTART)
 
 

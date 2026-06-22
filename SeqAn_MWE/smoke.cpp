@@ -37,8 +37,13 @@ int main(int argc, char ** argv)
     //     conventions: match rewarded, mismatch penalised, no natural classes.)
     typedef Score<int, ScoreMatrix<char, Default> > TScore;
     TScore sc;
-    for (unsigned i = 0; i < ValueSize<char>::VALUE; ++i)
-        for (unsigned j = 0; j < ValueSize<char>::VALUE; ++j)
+    // Only set scores over 7-bit ASCII. SeqAn's setScore casts the symbol to
+    // (signed) char then unsigned int, so byte values >= 128 become a negative
+    // char and a huge out-of-bounds index where char is signed (x86) -- a
+    // segfault that is masked where char is unsigned (ARM). ASCII covers every
+    // real residue and stays portable.
+    for (unsigned i = 0; i < 128; ++i)
+        for (unsigned j = 0; j < 128; ++j)
             setScore(sc, (char)i, (char)j, (i == j) ? 2 : -1);
     setScoreGapOpen(sc,   -2);   // affine gap-open
     setScoreGapExtend(sc, -1);   // affine gap-extend

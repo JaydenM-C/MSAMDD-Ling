@@ -42,5 +42,11 @@ MSAMDD_MWE/results/
 # Compiled smoke-test binary (extensionless, not caught by the rules above).
 SeqAn_MWE/smoke
 
+# --- seqan_warmstart ---
+# Compiled warm-start aligner binary (extensionless, built at the repo root by
+# `make`). Leading slash anchors this to the root file so it does NOT match the
+# src/seqan_warmstart/ source directory.
+/seqan_warmstart
+
 # Misc
 .DS_store

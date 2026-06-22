@@ -8,9 +8,9 @@ arbitrary ASCII character sets and custom substitution matrices.
 
 ## Status
 
-Early-stage. Build not yet verified locally; SeqAn v2 integration not yet 
-started; no original code has landed. Treat the conventions below as 
-provisional — update this file as real decisions get made.
+Early-stage. SeqAn v2 integration implemented but not fully road-tested. 
+Treat the conventions below as provisional — update this file as real 
+decisions get made.
 
 ## Relation to upstream
 

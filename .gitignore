@@ -38,5 +38,9 @@ MSAMDD_MWE/docker/cplex_linux.bin
 # Smoke-test outputs.
 MSAMDD_MWE/results/
 
+# --- SeqAn_MWE ---
+# Compiled smoke-test binary (extensionless, not caught by the rules above).
+SeqAn_MWE/smoke
+
 # Misc
 .DS_store

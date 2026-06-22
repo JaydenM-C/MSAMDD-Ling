@@ -30,3 +30,10 @@
 *.exe
 *.out
 *.app
+
+# --- MSAMDD_MWE / Docker ---
+# Proprietary IBM CPLEX installer - never commit (large, licensed).
+MSAMDD_MWE/docker/cplex_linux.bin
+*.bin
+# Smoke-test outputs.
+MSAMDD_MWE/results/

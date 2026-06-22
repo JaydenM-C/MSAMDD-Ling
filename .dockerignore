@@ -1,0 +1,12 @@
+# Keep the Docker build context lean. NOTE: do NOT ignore
+# MSAMDD_MWE/docker/cplex_linux.bin - stage 1 of the Dockerfile needs it.
+.git
+.gitignore
+**/.DS_Store
+# Host-built artifacts: rebuilt fresh inside the container.
+obj/
+msa_aff
+msa_cnv
+*.o
+# Smoke-test outputs (also bind-mounted at runtime).
+MSAMDD_MWE/results/

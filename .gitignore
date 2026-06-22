@@ -37,3 +37,6 @@ MSAMDD_MWE/docker/cplex_linux.bin
 *.bin
 # Smoke-test outputs.
 MSAMDD_MWE/results/
+
+# Misc
+.DS_store

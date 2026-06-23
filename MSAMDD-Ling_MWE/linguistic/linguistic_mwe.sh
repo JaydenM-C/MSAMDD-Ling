@@ -47,10 +47,14 @@ rule() { printf '%s\n' "========================================================
 [ -f "${REPO_ROOT}/muscle" ] || { say "ERROR: ./muscle missing."; exit 1; }
 command -v python3 >/dev/null || { say "ERROR: python3 not found."; exit 1; }
 
-say "[build] rm -f msa_aff seqan_warmstart && make msa_aff seqan_warmstart"
-rm -f msa_aff seqan_warmstart
-make msa_aff seqan_warmstart >"${RESULTS}/ling_build.log" 2>&1 || {
-  say "  build FAILED -- tail:"; tail -n 25 "${RESULTS}/ling_build.log" | sed 's/^/    /'; exit 1; }
+# validate_all.sh builds once up front and sets SKIP_BUILD=1.
+if [ "${SKIP_BUILD:-0}" != "1" ]; then
+  say "[build] rm -f msa_aff seqan_warmstart && make msa_aff seqan_warmstart"
+  rm -f msa_aff seqan_warmstart
+  make msa_aff seqan_warmstart >"${RESULTS}/ling_build.log" 2>&1 || {
+    say "  build FAILED -- tail:"; tail -n 25 "${RESULTS}/ling_build.log" | sed 's/^/    /'; exit 1; }
+fi
+[ -x "${REPO_ROOT}/msa_aff" ] && [ -x "${REPO_ROOT}/seqan_warmstart" ] || { say "ERROR: binaries missing (build first, or unset SKIP_BUILD)."; exit 1; }
 
 ALPHA="$(head -1 "${MATRIX}" | wc -w | tr -d ' ')"
 rule

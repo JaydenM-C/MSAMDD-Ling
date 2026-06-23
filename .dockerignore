@@ -3,10 +3,14 @@
 .git
 .gitignore
 **/.DS_Store
-# Host-built artifacts: rebuilt fresh inside the container.
+# Host-built artifacts: rebuilt fresh inside the container. The leading slash on
+# seqan_warmstart anchors it to the context root so a stale host binary is not
+# copied in, WITHOUT excluding the src/seqan_warmstart/ source directory.
 obj/
 msa_aff
 msa_cnv
+/seqan_warmstart
 *.o
-# Smoke-test outputs (also bind-mounted at runtime).
+# Validation / smoke-test outputs (also bind-mounted at runtime).
 MSAMDD_MWE/results/
+MSAMDD-Ling_MWE/results/

@@ -21,7 +21,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 # bundled JRE fails to launch under emulation, so we provide one and point the
 # installer at it explicitly with LAX_VM. Java is only needed to install CPLEX,
 # not to run the solver, so it stays in this build stage (not the runtime image).
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Acquire::Retries hardens the fetch against transient mirror/DNS drops, which
+# are common when this amd64 image is built under emulation on Apple Silicon.
+RUN apt-get update -o Acquire::Retries=5 \
+    && apt-get install -y --no-install-recommends -o Acquire::Retries=5 \
         build-essential g++ make file ca-certificates python3 \
         openjdk-17-jre-headless \
     && rm -rf /var/lib/apt/lists/*
@@ -54,7 +57,8 @@ RUN rm -f /work/MSAMDD_MWE/docker/cplex_linux.bin \
 FROM --platform=linux/amd64 ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update -o Acquire::Retries=5 \
+    && apt-get install -y --no-install-recommends -o Acquire::Retries=5 \
         g++ make file python3 \
     && rm -rf /var/lib/apt/lists/*
 

@@ -99,7 +99,7 @@ run_arm() {
     obj="NA"
   fi
   opt=0
-  [ "${gap}" != "NA" ] && awk "BEGIN{exit !(${gap} < 0.01)}" && opt=1
+  if [ "${gap}" != "NA" ] && awk "BEGIN{exit !(${gap} < 0.01)}"; then opt=1; fi
   printf '%s\t%s\t%s\t%s\t%s\n' "${inc}" "${gap}" "${wall}" "${obj}" "${opt}"
 }
 
@@ -116,11 +116,15 @@ any_inconclusive=0
 for entry in ${ENTRIES}; do
   [ -f "${entry}" ] || { say "  (missing input: ${entry})"; continue; }
   name="$(basename "${entry%.*}")"
+  # Run on a COPY inside results/ so the solver's byproducts (_s.txt, and the
+  # heur.cpp "_h.fa" heuristic-solution file, which msa_aff does NOT clean up)
+  # land in results/ rather than polluting Data/.
+  infile="${RESULTS}/${name}.in.fa"; cp -f "${entry}" "${infile}"
 
   install_seqan
-  IFS=$'\t' read -r sInc sGap sWall sObj sOpt < <(run_arm "${entry}" "seqan" "${name}")
+  IFS=$'\t' read -r sInc sGap sWall sObj sOpt < <(run_arm "${infile}" "seqan" "${name}")
   install_muscle_shim
-  IFS=$'\t' read -r mInc mGap mWall mObj mOpt < <(run_arm "${entry}" "muscle" "${name}")
+  IFS=$'\t' read -r mInc mGap mWall mObj mOpt < <(run_arm "${infile}" "muscle" "${name}")
   install_seqan
 
   printf '%-12s %-8s %14s %10s %8s %8s %6s\n' "${name}" "seqan" "${sObj}" "${sInc}" "${sGap}" "${sWall}" "${sOpt}"
@@ -153,3 +157,7 @@ else
 fi
 say "Per-arm logs + alignments: ${RESULTS#${REPO_ROOT}/}/<entry>.{seqan,muscle}.{log,fa}"
 rule
+
+# Exit non-zero only on a genuine optimum mismatch (the regression we guard
+# against). INCONCLUSIVE is a time-budget outcome, not a failure of the swap.
+[ "${overall_pass}" = "1" ]

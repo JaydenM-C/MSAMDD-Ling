@@ -1,0 +1,4 @@
+# Generated artifacts (ASCII FASTA, matrix, alignments, logs). Keep the dir,
+# ignore its contents.
+*
+!.gitignore

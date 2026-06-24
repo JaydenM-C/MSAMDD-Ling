@@ -2,23 +2,38 @@
 #
 # Detect the host OS to pick the CPLEX platform directory and toolchain flags,
 # so one Makefile builds the CPLEX solver on Linux (incl. Eureka2 / Rocky 8) and
-# on macOS. CPLEX ships an x86-64 build on macOS, so on Apple Silicon msa_* are
-# built as x86-64 binaries (run under Rosetta 2). The seqan_warmstart target is
-# CPLEX-independent and builds NATIVELY (arm64 on Apple Silicon) -- see below.
+# on macOS. On macOS the build matches the INSTALLED CPLEX architecture: native
+# arm64 against a 22.1.1+ Apple-Silicon CPLEX (lib/arm64_osx), or x86-64 under
+# Rosetta 2 against an Intel CPLEX (lib/x86-64_osx). SYSTEM defaults to the host
+# arch and ARCHFLAG follows it. The seqan_warmstart target is CPLEX-independent
+# and always builds NATIVELY -- see below.
 #
 # Anything here can be overridden on the command line if your install differs:
 #   make SYSTEM=x86-64_linux BASISDIR=$$HOME/cplex     # CPLEX in HPC home/scratch
-#   make BASISILOG=/Applications/CPLEX_Studio2211      # pin a specific studio dir
+#   make SYSTEM=x86-64_osx                             # force Rosetta build (Intel CPLEX on M1)
+#   make BASISILOG=/Applications/CPLEX_Studio222       # pin a specific studio dir
 #   make CXX=g++-13                                    # a non-default compiler
 
 UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S),Darwin)
-  SYSTEM    ?= x86-64_osx
+  # Default SYSTEM to the host arch (arm64 CPLEX on Apple Silicon, x86-64 on Intel
+  # / under Rosetta); ARCHFLAG follows SYSTEM so the two never disagree. Override
+  # SYSTEM to force the other (e.g. an x86-64 CPLEX on an M1 -> SYSTEM=x86-64_osx).
+  UNAME_M   := $(shell uname -m)
+  ifeq ($(UNAME_M),arm64)
+    SYSTEM  ?= arm64_osx
+  else
+    SYSTEM  ?= x86-64_osx
+  endif
+  ifeq ($(SYSTEM),arm64_osx)
+    ARCHFLAG := -arch arm64
+  else
+    ARCHFLAG := -arch x86_64   # x86-64 macOS libs -> Rosetta 2 on Apple Silicon
+  endif
   BASISDIR  ?= /Applications
-  ARCHFLAG  := -arch x86_64    # link CPLEX's x86-64 macOS libs (Rosetta 2 on M1)
   PIEFLAG   :=                 # -no-pie is GNU/Linux-only; omit on macOS
-  LDLIBS_OS :=                 # dlopen is in libSystem; no separate -ldl
+  LDLIBS_OS := -framework CoreFoundation -framework IOKit -framework Accelerate  # CPLEX on macOS; Accelerate supplies CBLAS (cblas_dgemm)
   SORTV     := sort            # BSD sort lacks -V; pin BASISILOG if multi-version
 else
   SYSTEM    ?= x86-64_linux
